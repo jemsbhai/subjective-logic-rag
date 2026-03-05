@@ -25,7 +25,7 @@
 
 ```bash
 # Clone
-git clone https://github.com/YOUR_USERNAME/xrag.git
+git clone https://github.com/jemsbhai/xrag.git
 cd xrag
 
 # Create virtual environment
