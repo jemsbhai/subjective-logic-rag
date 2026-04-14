@@ -28,6 +28,10 @@ from xrag.baselines.p_true import (
 from xrag.baselines.combined_heuristic import (
     CombinedHeuristicScorer,
 )
+from xrag.baselines.conformal_prediction import (
+    compute_conformal_threshold,
+    SplitConformalScorer,
+)
 
 __all__ = [
     "UQScore",
@@ -54,4 +58,7 @@ __all__ = [
     "PTrueScorer",
     # Combined heuristic (free)
     "CombinedHeuristicScorer",
+    # Conformal prediction (free after calibration)
+    "compute_conformal_threshold",
+    "SplitConformalScorer",
 ]
