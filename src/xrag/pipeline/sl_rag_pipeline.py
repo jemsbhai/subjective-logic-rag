@@ -15,12 +15,12 @@ from typing import Any, Optional
 
 from jsonld_ex.confidence_algebra import Opinion
 
-from xrag.pipeline.conflict_layer import ConflictLayer, NoOpConflictLayer
-from xrag.pipeline.decision_layer import DecisionLayer, NoOpDecisionLayer
+from xrag.pipeline.conflict_layer import ConflictLayer, NoOpConflictLayer, SLConflictLayer
+from xrag.pipeline.decision_layer import DecisionLayer, NoOpDecisionLayer, SLDecisionLayer
 from xrag.pipeline.deduction_layer import DeductionLayer, NoOpDeductionLayer
-from xrag.pipeline.fusion_layer import FusionLayer, NoOpFusionLayer
-from xrag.pipeline.temporal_layer import NoOpTemporalLayer, TemporalLayer
-from xrag.pipeline.trust_layer import NoOpTrustLayer, TrustLayer
+from xrag.pipeline.fusion_layer import FusionLayer, FusionStrategy, NoOpFusionLayer, SLFusionLayer
+from xrag.pipeline.temporal_layer import NoOpTemporalLayer, SLTemporalLayer, TemporalLayer
+from xrag.pipeline.trust_layer import NoOpTrustLayer, SLTrustLayer, TrustLayer
 
 
 @dataclass
@@ -92,6 +92,46 @@ class SLRAGPipeline:
             fusion_layer=NoOpFusionLayer(),
             deduction_layer=NoOpDeductionLayer(),
             decision_layer=NoOpDecisionLayer(),
+        )
+
+    @classmethod
+    def with_default_layers(
+        cls,
+        fusion_strategy: FusionStrategy = "cumulative",
+        default_trust: Optional[Opinion] = None,
+        half_life: float = 168.0,
+        conflict_threshold: float = 0.3,
+        tau_abstain: float = 0.7,
+        tau_conflict: float = 0.5,
+    ) -> SLRAGPipeline:
+        """Create a pipeline with real SL layers and sensible defaults.
+
+        Args:
+            fusion_strategy: Fusion method (default: cumulative).
+            default_trust: Default trust opinion for all docs.
+                Default: high trust (b=0.9, d=0.0, u=0.1) for Wikipedia.
+            half_life: Temporal decay half-life in hours (default: 168 = 1 week).
+            conflict_threshold: Pairwise conflict threshold (default: 0.3).
+            tau_abstain: Uncertainty threshold for abstention (default: 0.7).
+            tau_conflict: Conflict score threshold for flagging (default: 0.5).
+
+        Returns:
+            SLRAGPipeline with real SL layers wired.
+        """
+        if default_trust is None:
+            default_trust = Opinion(
+                belief=0.9, disbelief=0.0, uncertainty=0.1, base_rate=0.5,
+            )
+
+        return cls(
+            trust_layer=SLTrustLayer(default_trust=default_trust),
+            temporal_layer=SLTemporalLayer(half_life=half_life),
+            conflict_layer=SLConflictLayer(threshold=conflict_threshold),
+            fusion_layer=SLFusionLayer(strategy=fusion_strategy),
+            deduction_layer=NoOpDeductionLayer(),
+            decision_layer=SLDecisionLayer(
+                tau_abstain=tau_abstain, tau_conflict=tau_conflict,
+            ),
         )
 
     def run(

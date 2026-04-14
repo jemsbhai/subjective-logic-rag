@@ -607,3 +607,76 @@ class TestSLRAGPipelineRun:
         assert "temporal_opinions" in result.metadata
         assert "conflict_result" in result.metadata
         assert "decision_result" in result.metadata
+
+
+# ════════════════════════════════════════════════════════════════════
+# with_default_layers factory
+# ════════════════════════════════════════════════════════════════════
+
+
+class TestWithDefaultLayers:
+    """Tests for the SLRAGPipeline.with_default_layers() factory."""
+
+    def test_creates_pipeline(self):
+        from xrag.pipeline.sl_rag_pipeline import SLRAGPipeline
+        pipeline = SLRAGPipeline.with_default_layers()
+        assert isinstance(pipeline, SLRAGPipeline)
+
+    def test_uses_real_sl_layers(self):
+        from xrag.pipeline.sl_rag_pipeline import SLRAGPipeline
+        from xrag.pipeline.fusion_layer import SLFusionLayer
+        from xrag.pipeline.trust_layer import SLTrustLayer
+        from xrag.pipeline.temporal_layer import SLTemporalLayer
+        from xrag.pipeline.conflict_layer import SLConflictLayer
+        from xrag.pipeline.decision_layer import SLDecisionLayer
+
+        pipeline = SLRAGPipeline.with_default_layers()
+        assert isinstance(pipeline.trust_layer, SLTrustLayer)
+        assert isinstance(pipeline.temporal_layer, SLTemporalLayer)
+        assert isinstance(pipeline.fusion_layer, SLFusionLayer)
+        assert isinstance(pipeline.conflict_layer, SLConflictLayer)
+        assert isinstance(pipeline.decision_layer, SLDecisionLayer)
+
+    def test_runs_with_real_opinions(self):
+        from xrag.pipeline.sl_rag_pipeline import SLRAGPipeline
+        pipeline = SLRAGPipeline.with_default_layers()
+        result = pipeline.run(query="Q?", doc_opinions=_sample_opinions(3))
+        assert result.decision in ("generate", "abstain", "flag_conflict")
+        assert result.fused_opinion is not None
+        total = result.fused_opinion.belief + result.fused_opinion.disbelief + result.fused_opinion.uncertainty
+        assert abs(total - 1.0) < 1e-9
+
+    def test_custom_fusion_strategy(self):
+        from xrag.pipeline.sl_rag_pipeline import SLRAGPipeline
+        pipeline = SLRAGPipeline.with_default_layers(fusion_strategy="averaging")
+        assert pipeline.fusion_layer.strategy == "averaging"
+
+    def test_custom_thresholds(self):
+        from xrag.pipeline.sl_rag_pipeline import SLRAGPipeline
+        pipeline = SLRAGPipeline.with_default_layers(
+            tau_abstain=0.8, tau_conflict=0.6,
+        )
+        assert pipeline.decision_layer.tau_abstain == 0.8
+        assert pipeline.decision_layer.tau_conflict == 0.6
+
+    def test_conflicting_opinions_detected(self):
+        """Real conflict layer should detect strong disagreement."""
+        from xrag.pipeline.sl_rag_pipeline import SLRAGPipeline
+        pipeline = SLRAGPipeline.with_default_layers(tau_conflict=0.3)
+        opinions = [
+            Opinion(belief=0.9, disbelief=0.05, uncertainty=0.05),
+            Opinion(belief=0.05, disbelief=0.9, uncertainty=0.05),
+        ]
+        result = pipeline.run(query="Conflicting?", doc_opinions=opinions)
+        assert result.conflict_detected is True
+
+    def test_high_uncertainty_abstains(self):
+        """Real decision layer should abstain on high uncertainty."""
+        from xrag.pipeline.sl_rag_pipeline import SLRAGPipeline
+        pipeline = SLRAGPipeline.with_default_layers(tau_abstain=0.5)
+        opinions = [
+            Opinion(belief=0.05, disbelief=0.05, uncertainty=0.9),
+            Opinion(belief=0.1, disbelief=0.0, uncertainty=0.9),
+        ]
+        result = pipeline.run(query="Uncertain?", doc_opinions=opinions)
+        assert result.decision == "abstain"
