@@ -9,7 +9,7 @@ Design:
     - RAGPromptTemplate: configurable prompt formatting
     - GenerationResult: answer, prompt, token_logprobs (for softmax entropy baseline)
 
-Models live at D:\\cc\\models\\ (portable SSD, not primary drive).
+Models live at E:\\data\\code\\claudecode\\models\\.
 """
 
 from __future__ import annotations
@@ -60,7 +60,8 @@ class RAGPromptTemplate:
     """
 
     template: str = (
-        "Given the following context, answer the question concisely.\n\n"
+        "Answer the question based on the context below.\n"
+        "Respond with ONLY the answer — no explanation, no complete sentences.\n\n"
         "Context:\n{context}\n\n"
         "Question: {query}\n"
         "Answer:"
@@ -208,6 +209,25 @@ class HuggingFaceGenerator(Generator):
         self.model.eval()
         self._loaded = True
 
+    @staticmethod
+    def _clean_answer(raw: str) -> str:
+        """Post-process generated answer.
+
+        Truncates at the first newline or common continuation patterns
+        (e.g., 'You are an AI', 'Answer:', 'Question:') to extract
+        just the answer from verbose model output.
+        """
+        # Take first line only
+        answer = raw.split("\n")[0].strip()
+
+        # Truncate at common continuation markers
+        for marker in ["You are", "Answer:", "Question:", "Context:", "Note:"]:
+            idx = answer.find(marker)
+            if idx > 0:
+                answer = answer[:idx].strip()
+
+        return answer
+
     def generate(
         self,
         query: str,
@@ -280,7 +300,8 @@ class HuggingFaceGenerator(Generator):
             generated_ids = output[0][input_len:]
             token_logprobs = None
 
-        answer = self.tokenizer.decode(generated_ids, skip_special_tokens=True).strip()
+        raw_answer = self.tokenizer.decode(generated_ids, skip_special_tokens=True).strip()
+        answer = self._clean_answer(raw_answer)
 
         return GenerationResult(
             answer=answer,

@@ -1,0 +1,41 @@
+name: hotpotqa_llama8b_contradiction_25
+seed: 42
+dataset:
+  name: hotpotqa
+  split: validation
+  max_samples: 500
+retrieval:
+  method: gold
+  top_k: 10
+  precomputed_path: null
+corruption:
+  type: contradiction
+  level: 0.25
+  seed: 42
+estimation:
+  method: nli
+  batch_size: 32
+pipeline:
+  fusion_strategy: cumulative
+  default_trust_belief: 0.9
+  half_life: 168.0
+  conflict_threshold: 0.3
+  tau_abstain: 0.7
+  tau_conflict: 0.5
+  ablation: null
+baselines:
+  run_softmax: true
+  run_retrieval_conf: true
+  run_semantic_entropy: false
+  run_p_true: true
+  run_combined_heuristic: true
+  run_conformal: true
+  semantic_entropy_n_samples: 5
+generation:
+  model_path: E:\data\code\claudecode\models\Llama-3.1-8B-Instruct
+  load_in_4bit: true
+  max_new_tokens: 128
+  device: cuda
+output:
+  results_dir: experiments/results
+  save_predictions: true

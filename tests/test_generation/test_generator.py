@@ -124,8 +124,8 @@ class TestHuggingFaceGeneratorConstruction:
 
     def test_stores_model_path(self):
         gen = HuggingFaceGenerator.__new__(HuggingFaceGenerator)
-        gen.model_path = "D:\\cc\\models\\test"
-        assert gen.model_path == "D:\\cc\\models\\test"
+        gen.model_path = "E:\\data\\code\\claudecode\\models\\test"
+        assert gen.model_path == "E:\\data\\code\\claudecode\\models\\test"
 
 
 # ════════════════════════════════════════════════════════════════════
@@ -197,9 +197,9 @@ class TestHuggingFaceGeneratorMocked:
 
 
 _AVAILABLE_MODELS = [
-    ("Qwen2.5-7B", "D:\\cc\\models\\Qwen2.5-7B-Instruct"),
-    ("Mistral-7B-v0.3", "D:\\cc\\models\\Mistral-7B-Instruct-v0.3"),
-    ("Llama-3.1-8B", "D:\\cc\\models\\Llama-3.1-8B-Instruct"),
+    ("Qwen2.5-7B", "E:\\data\\code\\claudecode\\models\\Qwen2.5-7B-Instruct"),
+    ("Mistral-7B-v0.3", "E:\\data\\code\\claudecode\\models\\Mistral-7B-Instruct-v0.3"),
+    ("Llama-3.1-8B", "E:\\data\\code\\claudecode\\models\\Llama-3.1-8B-Instruct"),
 ]
 
 
@@ -218,8 +218,8 @@ class TestHuggingFaceGeneratorIntegration:
     """Integration tests with a real local LLM.
 
     Requires one of:
-        - Qwen2.5-7B-Instruct at D:\\cc\\models\\Qwen2.5-7B-Instruct
-        - Mistral-7B-Instruct-v0.3 at D:\\cc\\models\\Mistral-7B-Instruct-v0.3
+        - Qwen2.5-7B-Instruct at E:\\data\\code\\claudecode\\models\\Qwen2.5-7B-Instruct
+        - Mistral-7B-Instruct-v0.3 at E:\\data\\code\\claudecode\\models\\Mistral-7B-Instruct-v0.3
     Run with: python -m pytest -m "slow and gpu" tests/test_generation/
     """
 
@@ -227,7 +227,7 @@ class TestHuggingFaceGeneratorIntegration:
     def model_info(self):
         info = _find_available_model()
         if info is None:
-            pytest.skip("No local model found at D:\\cc\\models\\")
+            pytest.skip("No local model found at E:\\data\\code\\claudecode\\models\\")
         return info
 
     @pytest.fixture(scope="class")

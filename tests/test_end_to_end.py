@@ -7,7 +7,7 @@ Run with: python -m pytest -m "slow and gpu" tests/test_end_to_end.py -v
 
 Requires:
     - DeBERTa NLI model (cached from previous integration tests)
-    - Llama 3.1 8B Instruct at D:\\cc\\models\\Llama-3.1-8B-Instruct
+    - Llama 3.1 8B Instruct at E:\\data\\code\\claudecode\\models\\Llama-3.1-8B-Instruct
     - HotpotQA dataset (downloaded on demand via HuggingFace)
 """
 
@@ -26,9 +26,9 @@ class TestEndToEnd:
     """Full pipeline integration test on HotpotQA examples."""
 
     AVAILABLE_MODELS = [
-        ("Qwen2.5-7B", "D:\\cc\\models\\Qwen2.5-7B-Instruct"),
-        ("Mistral-7B-v0.3", "D:\\cc\\models\\Mistral-7B-Instruct-v0.3"),
-        ("Llama-3.1-8B", "D:\\cc\\models\\Llama-3.1-8B-Instruct"),
+        ("Qwen2.5-7B", "E:\\data\\code\\claudecode\\models\\Qwen2.5-7B-Instruct"),
+        ("Mistral-7B-v0.3", "E:\\data\\code\\claudecode\\models\\Mistral-7B-Instruct-v0.3"),
+        ("Llama-3.1-8B", "E:\\data\\code\\claudecode\\models\\Llama-3.1-8B-Instruct"),
     ]
 
     @pytest.fixture(scope="class")
@@ -68,7 +68,7 @@ class TestEndToEnd:
                     device="cuda",
                     load_in_4bit=True,
                 )
-        pytest.skip("No local model found at D:\\cc\\models\\")
+        pytest.skip("No local model found at E:\\data\\code\\claudecode\\models\\")
 
     def test_full_pipeline_single_query(
         self, hotpotqa_examples, gold_retriever, nli_estimator, pipeline, generator
