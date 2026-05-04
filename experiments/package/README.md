@@ -18,8 +18,8 @@ with the SL-RAG pipeline and all UQ baselines.
 
 ```bash
 # 1. Clone the repo
-git clone <repo_url> xrag
-cd xrag/phase1
+git clone https://github.com/jemsbhai/subjective-logic-rag.git
+cd subjective-logic-rag
 
 # 2. Set HuggingFace token
 export HF_TOKEN=hf_your_token_here

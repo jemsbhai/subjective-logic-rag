@@ -13,6 +13,11 @@
 
 set -e
 
+# Ensure we're at the repo root
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+cd "$REPO_ROOT"
+
 source .venv/bin/activate
 export CUDA_VISIBLE_DEVICES=0,1
 

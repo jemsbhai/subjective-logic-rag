@@ -4,7 +4,13 @@
 
 set -e
 
+# Ensure we're at the repo root
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+cd "$REPO_ROOT"
+
 echo "=== SL-RAG A100 Experiment Setup ==="
+echo "Working directory: $REPO_ROOT"
 echo ""
 
 # 1. Create virtual environment
@@ -24,7 +30,7 @@ mkdir -p models
 # Llama 3.1 70B (primary — ~140GB)
 if [ ! -d "models/Llama-3.1-70B-Instruct" ]; then
     echo "  Downloading Llama 3.1 70B Instruct..."
-    huggingface-cli download meta-llama/Llama-3.1-70B-Instruct \
+    hf download meta-llama/Llama-3.1-70B-Instruct \
         --local-dir models/Llama-3.1-70B-Instruct \
         --exclude "original/*"
     echo "  Done."
@@ -35,7 +41,7 @@ fi
 # Qwen 2.5 72B (secondary — if time permits, ~150GB)
 if [ ! -d "models/Qwen2.5-72B-Instruct" ]; then
     echo "  Downloading Qwen 2.5 72B Instruct..."
-    huggingface-cli download Qwen/Qwen2.5-72B-Instruct \
+    hf download Qwen/Qwen2.5-72B-Instruct \
         --local-dir models/Qwen2.5-72B-Instruct
     echo "  Done."
 else
@@ -52,4 +58,4 @@ print('Import OK')
 
 echo ""
 echo "=== Setup complete ==="
-echo "Run experiments with: bash run_a100.sh"
+echo "Run experiments with: bash experiments/package/run_a100.sh"
